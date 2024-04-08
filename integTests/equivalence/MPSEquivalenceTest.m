@@ -1,12 +1,4 @@
 classdef MPSEquivalenceTest < matlabtest.compiler.TestCase
-    properties(TestParameter)
-        % Can define different runtime inputs for the equivalence test
-        % For now we will just run against 1 data point
-        damping = struct(...
-           ... "OverDamped", 5e5, ...
-           ... "UnderDamped", 1e4, ...
-            "CriticallyDamped", 5.477225575051661e4)
-    end
 
     methods(TestClassSetup)
         function filterOnMac(testCase)
@@ -14,16 +6,27 @@ classdef MPSEquivalenceTest < matlabtest.compiler.TestCase
                 "MPS equivalence tests not supported on the mac");
         end
     end
-   
+
+    properties(TestParameter)
+        
+        resultsFile = {getBuildResultsFile};
+        
+        % Can define different runtime inputs for the equivalence test
+        damping = struct(...
+            "OverDamped", 5e5, ...
+            "UnderDamped", 1e4, ...
+            "CriticallyDamped", 5.477225575051661e4)
+    end
+    
+
     methods (Test)
-        function mpsShouldBeEquivalentForDamping(testCase, damping)
+        function mpsShouldBeEquivalentForDamping(testCase, resultsFile, damping)
             % Validate that MPS execution is equivalent to MATLAB for
             % various damping coefficient designs
-
-            % Load the data we built via the build process
-            disp("Loading MPS build results")
-            prj = currentProject;
-            loadedData = load(prj.RootFolder + "/results/ctf-build-results.mat");
+            
+            % Load the results built in a prior build step
+            disp("Load the build results from the ""ctf"" task")
+            loadedData = load(resultsFile);
             buildResults = loadedData.buildResults;
 
             % Execute the runtime inputs (damping) on the server
@@ -35,14 +38,14 @@ classdef MPSEquivalenceTest < matlabtest.compiler.TestCase
             % bv20240306 TBD
             % Verify server execution is equivalent to the local results
             disp("Verifying results match MATLAB results")
-            % Note: Fails due to a bug which is fixed in the R2024a GR
-            % testCase.verifyExecutionMatchesMATLAB(executionResults);
+            testCase.verifyExecutionMatchesMATLAB(executionResults);
 
-            % Verification workaround - not needed in GR. Note this
-            % solution is not only less convenient, but also does not
-            % produce diagnostics as valuable as the above method
-            [x, t] = simulateSystem(design);
-            testCase.verifyEqual(executionResults.ExecutableOutput, {x, t});
         end
     end
+end
+
+function resultsFile = getBuildResultsFile
+prj = currentProject;
+resultsFile = fullfile(prj.RootFolder,...
+    "results", computer("arch"), "ctf-build-results.mat");
 end

@@ -46,6 +46,10 @@ end
 
 function resultsFile = getBuildResultsFile
 prj = currentProject;
+
+% TBD bv20240408
+% resultsFile = fullfile(prj.RootFolder,...
+%    "results", computer("arch"), "ctf-build-results.mat");
 resultsFile = fullfile(prj.RootFolder,...
-    "results", computer("arch"), "ctf-build-results.mat");
+    "results", "ctf-build-results.mat");
 end

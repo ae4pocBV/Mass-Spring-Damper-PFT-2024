@@ -29,9 +29,11 @@ jobs:
       - uses: actions/checkout@v4
        
       - name: Setup MATLAB
-        uses: matlab-actions/setup-matlab@v2-prerelease
+        # bv20240409 remove prerelease: uses: matlab-actions/setup-matlab@v2-prerelease
+        uses: matlab-actions/setup-matlab@v2
         with:
-          release: latest-including-prerelease
+          # bv20240409 remove prerelease: release: latest-including-prerelease
+          release: latest
           cache: true
           products: ${{ env.PRODUCT_LIST }}
  
@@ -59,9 +61,11 @@ jobs:
       - uses: actions/checkout@v4
  
       - name: Setup MATLAB
-        uses: matlab-actions/setup-matlab@v2-prerelease
+        # bv20240409 remove prerelease: matlab-actions/setup-matlab@v2-prerelease
+        uses: matlab-actions/setup-matlab@v2
         with:
-          release: latest-including-prerelease
+        # bv20240409 remove prerelease: release: latest-including-prerelease
+          release: latest
           cache: true
           products: ${{ env.PRODUCT_LIST }}
  
@@ -111,9 +115,11 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup MATLAB
-        uses: matlab-actions/setup-matlab@v2-prerelease
+      # bv20240409 remove prerelease: matlab-actions/setup-matlab@v2-prerelease
+        uses: matlab-actions/setup-matlab@v2
         with:
-          release: latest-including-prerelease
+        # bv20240409 remove prerelease: latest-including-prerelease
+          release: latest
           cache: true
           products: ${{ env.PRODUCT_LIST }}
 

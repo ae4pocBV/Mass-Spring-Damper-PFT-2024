@@ -141,7 +141,7 @@ function toolboxTask(context,version)
 
 arguments
     context
-    version string = "2.3.13." + string(posixtime(datetime('now')) * 1e6);
+    version string = "24.2.0." + string(posixtime(datetime('now')) * 1e6);
 end
 
 outputFile = context.Task.Outputs.paths;

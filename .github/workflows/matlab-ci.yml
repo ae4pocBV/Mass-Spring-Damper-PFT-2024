@@ -1,4 +1,5 @@
 # This is a basic workflow to help you get started with MATLAB Actions
+
 name: MATLAB Build
 
 # Controls when the action will run. 
@@ -6,11 +7,10 @@ on:
   push:                       # Runs on push events
   pull_request:               # Runs on pull requests
   workflow_dispatch:          # Allows you to run this workflow manually from the Actions tab
-  schedule:
-    - cron:  '7 6 * * 3' # schedule a weekly build to keep caches warm
+
 
 env:
-  PRODUCT_LIST: MATLAB MATLAB_Test MATLAB_Compiler MATLAB_Compiler_SDK Parallel_Computing_Toolbox
+  PRODUCT_LIST: MATLAB MATLAB_Test MATLAB_Compiler MATLAB_Compiler_SDK
   MLM_LICENSE_TOKEN: ${{secrets.MLM_LICENSE_TOKEN}}
 
 jobs:
@@ -19,7 +19,8 @@ jobs:
     # This job will run for each OS present in the matrix
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-13, macos-14]  
+      # bv20240409: valid OS > [ubuntu-latest, windows-latest, macos-13]
+        os: [ubuntu-latest] 
      
     # The type of runner that the job will run on
     runs-on: ${{ matrix.os }}
@@ -28,9 +29,11 @@ jobs:
       - uses: actions/checkout@v4
        
       - name: Setup MATLAB
+        # bv20240409 remove prerelease: uses: matlab-actions/setup-matlab@v2-prerelease
         uses: matlab-actions/setup-matlab@v2
         with:
-          release: latest-including-prerelease
+          # bv20240409 remove prerelease: release: latest-including-prerelease
+          release: latest
           cache: true
           products: ${{ env.PRODUCT_LIST }}
  
@@ -38,7 +41,6 @@ jobs:
         uses: matlab-actions/run-build@v2
         with:
           tasks: test
-          build-options: -parallel
  
       - name: Uploads mex files, test results, and build traces
         uses: actions/upload-artifact@v4
@@ -53,30 +55,38 @@ jobs:
     # This job executes only after a successful completion of 'mex-and-unittests' job
     needs: mex-and-unittests
 
-    runs-on:  ubuntu-latest
-    
+    runs-on: ubuntu-latest
+ 
     steps:
       - uses: actions/checkout@v4
  
       - name: Setup MATLAB
+        # bv20240409 remove prerelease: matlab-actions/setup-matlab@v2-prerelease
         uses: matlab-actions/setup-matlab@v2
         with:
-          release: latest-including-prerelease
+        # bv20240409 remove prerelease: release: latest-including-prerelease
+          release: latest
           cache: true
           products: ${{ env.PRODUCT_LIST }}
+ 
+      - name: Start display server (required for building doc in MATLAB)
+        run: |
+          Xvfb :99 & 
+          echo "DISPLAY=:99" >> $GITHUB_ENV
 
-      - name: Setup display (required for building doc in MATLAB)
-        uses: pyvista/setup-headless-display-action@v2
-        with:
-          pyvista: false
-
-      - name: Download artifacts from all platforms
+      - name: Download Mac artifacts 
         uses: actions/download-artifact@v4
         with:   
-          pattern: build-artifacts-*
+          pattern: build-artifacts-macos-13
           merge-multiple: true
       
-      - name: Download artifacts from the running platform last to guarantee incremental build
+      - name: Download Windows artifacts 
+        uses: actions/download-artifact@v4
+        with:   
+          pattern: build-artifacts-windows-latest
+          merge-multiple: true
+     
+      - name: Download Linux artifacts 
         uses: actions/download-artifact@v4
         with:   
           pattern: build-artifacts-ubuntu-latest
@@ -90,39 +100,42 @@ jobs:
       - name: Upload Toolbox 
         uses: actions/upload-artifact@v4
         with:
-          name: Mass-Spring-Damper Toolbox (All Platforms)
+          name: Mass-Spring-Damper Toolbox (All platforms)
           path: release/Mass-Spring-Damper.mltbx
+
 
   deploy-service:
     # This job executes only after a successful completion of 'mex-and-unittests' job
     needs: mex-and-unittests
-  
-  
+
+
     runs-on: ubuntu-latest
-  
+
     steps:
       - uses: actions/checkout@v4
-  
+
       - name: Setup MATLAB
+      # bv20240409 remove prerelease: matlab-actions/setup-matlab@v2-prerelease
         uses: matlab-actions/setup-matlab@v2
         with:
-          release: latest-including-prerelease
+        # bv20240409 remove prerelease: latest-including-prerelease
+          release: latest
           cache: true
           products: ${{ env.PRODUCT_LIST }}
-  
+
       - name: Download Linux artifacts(to benefit from incremental build)
         uses: actions/download-artifact@v4
         with:   
           pattern: build-artifacts-ubuntu-latest
           merge-multiple: true
-  
+
       - name: Build the ctf archive and run equivalence integration tests
         uses: matlab-actions/run-build@v2
         with:
           tasks: deploy
-  
+
       - name: Upload Production Server Archive 
         uses: actions/upload-artifact@v4
         with:
           name: Mass-Spring-Damper Production Server Archive 
-          path: results/glnxa64/ctf-archive
+          path: results/ctf-archive

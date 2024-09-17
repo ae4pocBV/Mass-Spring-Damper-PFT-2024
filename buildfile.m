@@ -1,36 +1,36 @@
 function plan = buildfile
-import matlab.buildtool.*;
 import matlab.buildtool.tasks.*;
 
 plan = buildplan(localfunctions);
-plan.DefaultTasks = "release"; 
-
-resultsFolder = fullfile("results",computer("arch"));
+plan.DefaultTasks = ["release" "deploy"]; 
 
 %% Enable cleaning derived build outputs
 plan("clean") = CleanTask;
 
+
 %% Lint the code and tests
-plan("lint") = CodeIssuesTask(Results=resultsFolder + "/code-issues.sarif");
+plan("lint") = CodeIssuesTask(Results="results/code-issues.sarif");
+
+
+%% Build mex files and place them in toolbox folder
+plan("mex_convec") = MexTask("mex/convec.c", "toolbox", Dependencies="setupCompiler");
+plan("mex_yprime") = MexTask("mex/yprime.cpp", "toolbox", Dependencies="setupCompiler");
+plan("mex") = matlab.buildtool.Task(Dependencies=["mex_convec", "mex_yprime"], ...
+    Description="Compile all mex files");
+
 
 %% Setup the MinGW compiler
 %   Ad hoc task, task action defined in setupCompilerTask local function
 plan("setupCompiler").Inputs = "buildutils/installMinGW.m";
 
 
-%% Build all mex files and place them in the toolbox folder
-plan("mex:convec") = MexTask("mex/convec.c","toolbox");
-plan("mex:yprime") = MexTask("mex/yprime.cpp","toolbox");
-plan("mex").Dependencies = "setupCompiler";
-
-
 %% Setup test, example test, and integration test tasks
 plan("test") = TestTask("tests", ...
     SourceFiles=["code", "pcode", "mex"], ...
-    TestResults= resultsFolder + "/test-results.html", ...
+    TestResults="results/test-results.html", ...
     Dependencies="mex", ...
     Description="Run the unit tests.") ...
-    .addCodeCoverage(resultsFolder + "/coverage/index.html", MetricLevel="mcdc");
+    .addCodeCoverage("results/coverage/index.html", MetricLevel="mcdc");
 
 
 %% P-code sensitive code and grab the M1 help to ship with the p-code files
@@ -66,12 +66,12 @@ plan("toolbox").Outputs = "release/Mass-Spring-Damper.mltbx";
 
 %% Integration tests for toolbox packaging (ensure toolbox works as a mltbx)
 plan("tbxIntegTest") = TestTask("integTests/toolboxPackaging",SourceFiles="toolbox", ...
-    Description="Run integration tests against packaged toolbox",...
-    Dependencies="toolbox");
+    Description="Run integration tests against packaged toolbox");
+plan("tbxIntegTest").Inputs = [plan("toolbox").Outputs, "integTests/toolboxPackaging"];
 
 
 %% Create the release task - does nothing but depends on other tasks
-plan("release") = Task(Dependencies="tbxIntegTest", ...
+plan("release") = matlab.buildtool.Task(Dependencies="tbxIntegTest", ...
     Description="Produce a fully qualified toolbox for release");
 
 
@@ -80,19 +80,19 @@ plan("release") = Task(Dependencies="tbxIntegTest", ...
 plan("ctf").Dependencies = ["lint","test"];
 plan("ctf").Inputs = ["code", "pcode", "buildutils/simulateSystemFunctionSignatures.json"];
 plan("ctf").Outputs = [...
-    resultsFolder + "/ctf-archive/MassSpringDamperService.ctf", ...
-    resultsFolder + "/ctf-build-results.mat", ...
-    resultsFolder + "/ctf-archive"];
+    "results/ctf-archive/MassSpringDamperService.ctf", ...
+    "results/ctf-build-results.mat", ...
+    "results/ctf-archive"];
 
 
 %% Integration tests - back-to-back equivalence tests for the production server archive
 plan("ctfIntegTest") = TestTask("integTests/equivalence",SourceFiles=["code","pcode"], ...
-    Description="Run integration tests against CTF archive.", ...
-    Dependencies="ctf");
+    Description="Run integration tests against CTF archive.");
+plan("ctfIntegTest").Inputs = [plan("ctf").Outputs, "integTests/equivalence"];
 
 
 %% Create the deploy task - does nothing but depends on other tasks
-plan("deploy") = Task(Dependencies="ctfIntegTest", ...
+plan("deploy") = matlab.buildtool.Task(Dependencies="ctfIntegTest", ...
     Description="Produce and test a ctf archive to deploy to a MATLAB Production Server");
 
 

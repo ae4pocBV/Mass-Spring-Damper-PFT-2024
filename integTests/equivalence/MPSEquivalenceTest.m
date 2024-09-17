@@ -35,6 +35,7 @@ classdef MPSEquivalenceTest < matlabtest.compiler.TestCase
             design.c = damping;
             executionResults = testCase.execute(buildResults,{design},"simulateSystem");
             
+            % bv20240306 TBD
             % Verify server execution is equivalent to the local results
             disp("Verifying results match MATLAB results")
             testCase.verifyExecutionMatchesMATLAB(executionResults);
@@ -45,6 +46,10 @@ end
 
 function resultsFile = getBuildResultsFile
 prj = currentProject;
+
+% TBD bv20240408
+% resultsFile = fullfile(prj.RootFolder,...
+%    "results", computer("arch"), "ctf-build-results.mat");
 resultsFile = fullfile(prj.RootFolder,...
-    "results", computer("arch"), "ctf-build-results.mat");
+    "results", "ctf-build-results.mat");
 end

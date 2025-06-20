@@ -6,6 +6,7 @@ continuous integration for PFT Summit 2024.
 [![Static Badge](https://img.shields.io/badge/MATLAB-Code_Coverage-green)](https://acampbel.github.io/Mass-Spring-Damper-PFT-2024/coverage)
 
 
+bv20250620: Regenerated token @ GitHub. In R2025a, commit and push
 bv20250620: New Git Clone project for R2025a
 bv20250620: Confirm still operational
 bv20250430: Check

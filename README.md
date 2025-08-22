@@ -8,6 +8,8 @@ continuous integration for PFT Summit 2024.
 bv20250822: Refresh, commit, pull, modify README.md, commit and push, confirm results
 bv20250822: Modify README.md, commit and push, confirm results
 bv20250620: In R2025a, commit and push
+bv20250620: Regenerated token @ GitHub. In R2025a, commit and push
+bv20250620: New Git Clone project for R2025a
 bv20250620: Confirm still operational
 bv20250430: Check
 bv20250331: Updated batch token >> Setting, actions, secrets and variables

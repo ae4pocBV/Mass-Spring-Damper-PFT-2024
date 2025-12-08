@@ -5,6 +5,7 @@ continuous integration for PFT Summit 2024.
 [![Static Badge](https://img.shields.io/badge/MATLAB-Test_Results-orange)](https://acampbel.github.io/Mass-Spring-Damper-PFT-2024/test-results)
 [![Static Badge](https://img.shields.io/badge/MATLAB-Code_Coverage-green)](https://acampbel.github.io/Mass-Spring-Damper-PFT-2024/coverage)
 
+bv20251208: After new fine-grained token.
 bv20251208: Confirm before generating new token.
 bv20250918: Same session credentials? Now with persistence?
 bv20250918: Confirm success

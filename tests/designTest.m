@@ -36,7 +36,6 @@ function testDampingTypes(testCase)
 [~, ~] = simulateSystem(springMassDamperDesign("criticallydamped",1000));
 end
 
-
 % function testWithInvalidStructInput(testCase)
 % % Test to ensure we fail gracefully with bogus input
 % 

@@ -115,7 +115,7 @@ exportedFiles = context.Task.Outputs.paths;
 for idx = 1:numel(mlxFiles)
     disp("Exporting " + mlxFiles(idx) + " to html");
     makeFolder(fileparts(exportedFiles(idx)));
-    export(mlxFiles(idx), exportedFiles(idx), Run=true);
+    export(mlxFiles(idx), exportedFiles(idx), Run=false); % Until 26a export bug is fixed
 end
 end
 
@@ -141,7 +141,11 @@ function toolboxTask(context,version)
 
 arguments
     context
+<<<<<<< HEAD
     version string = "24.2.0." + string(posixtime(datetime('now')) * 1e6);
+=======
+    version string = "2.3.13"
+>>>>>>> a4cd993b6482cfc037201517e9ceee305f086880
 end
 
 outputFile = context.Task.Outputs.paths;
@@ -149,7 +153,7 @@ disp("Packaging toolbox: " + outputFile);
 makeFolder(fileparts(outputFile));
 
 % Create the toolbox packaging options
-opts = matlab.addons.toolbox.ToolboxOptions("toolbox", "mathworks--Mass-Spring-Damper-Example",...
+opts = matlab.addons.toolbox.ToolboxOptions("toolbox", "e3a4ab76-0951-493d-9502-5cbd9e6e4611",...
     ToolboxName="Mass Spring Damper",...
     ToolboxVersion=version, ...
     OutputFile=outputFile, ...

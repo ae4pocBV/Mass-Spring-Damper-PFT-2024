@@ -2,7 +2,8 @@ function plan = buildfile
 import matlab.buildtool.tasks.*;
 
 plan = buildplan(localfunctions);
-plan.DefaultTasks = ["release" "deploy"]; 
+%% bv20261102 >>> plan.DefaultTasks = ["release" "deploy"]; 
+plan.DefaultTasks = ["deploy"]; 
 
 %% Enable cleaning derived build outputs
 plan("clean") = CleanTask;
